@@ -3,10 +3,11 @@ package com.laboratorio.labanalise.controller;
 import com.laboratorio.labanalise.DTO.InventarioItemDTO;
 import com.laboratorio.labanalise.services.InventarioService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/inventario")
@@ -15,27 +16,39 @@ public class InventarioController {
     @Autowired
     private InventarioService inventarioService;
 
-    // GET /inventario/reagentes
+    // GET /inventario/reagentes?page=0&size=10
     @GetMapping("/reagentes")
-    public ResponseEntity<List<InventarioItemDTO>> listarReagentes() {
-        return ResponseEntity.ok(inventarioService.listarReagentes());
+    public ResponseEntity<Page<InventarioItemDTO>> listarReagentes(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(inventarioService.listarReagentes(pageable));
     }
 
-    // GET /inventario/equipamentos
+    // GET /inventario/equipamentos?page=0&size=10
     @GetMapping("/equipamentos")
-    public ResponseEntity<List<InventarioItemDTO>> listarEquipamentos() {
-        return ResponseEntity.ok(inventarioService.listarEquipamentos());
+    public ResponseEntity<Page<InventarioItemDTO>> listarEquipamentos(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(inventarioService.listarEquipamentos(pageable));
     }
 
-    // GET /inventario/residuos
+    // GET /inventario/residuos?page=0&size=10
     @GetMapping("/residuos")
-    public ResponseEntity<List<InventarioItemDTO>> listarResiduos() {
-        return ResponseEntity.ok(inventarioService.listarResiduos());
+    public ResponseEntity<Page<InventarioItemDTO>> listarResiduos(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(inventarioService.listarResiduos(pageable));
     }
 
-    // GET /inventario/frascos
+    // GET /inventario/frascos?page=0&size=10
     @GetMapping("/frascos")
-    public ResponseEntity<List<InventarioItemDTO>> listarFrascos() {
-        return ResponseEntity.ok(inventarioService.listarFrascos());
+    public ResponseEntity<Page<InventarioItemDTO>> listarFrascos(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(inventarioService.listarFrascos(pageable));
     }
 }

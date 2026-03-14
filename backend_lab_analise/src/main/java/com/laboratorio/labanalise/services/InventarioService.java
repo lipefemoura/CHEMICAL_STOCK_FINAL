@@ -10,10 +10,9 @@ import com.laboratorio.labanalise.repositories.FrascoReagenteRepository;
 import com.laboratorio.labanalise.repositories.ReagenteRepository;
 import com.laboratorio.labanalise.repositories.ResiduoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class InventarioService {
@@ -30,32 +29,24 @@ public class InventarioService {
     @Autowired
     private FrascoReagenteRepository frascoReagenteRepository;
 
-    public List<InventarioItemDTO> listarReagentes() {
-        return reagenteRepository.findAll()
-                .stream()
-                .map(this::reagenteToDTO)
-                .collect(Collectors.toList());
+    public Page<InventarioItemDTO> listarReagentes(Pageable pageable) {
+        return reagenteRepository.findAll(pageable)
+                .map(this::reagenteToDTO);
     }
 
-    public List<InventarioItemDTO> listarEquipamentos() {
-        return equipamentoRepository.findAll()
-                .stream()
-                .map(this::equipamentoToDTO)
-                .collect(Collectors.toList());
+    public Page<InventarioItemDTO> listarEquipamentos(Pageable pageable) {
+        return equipamentoRepository.findAll(pageable)
+                .map(this::equipamentoToDTO);
     }
 
-    public List<InventarioItemDTO> listarResiduos() {
-        return residuoRepository.findAll()
-                .stream()
-                .map(this::residuoToDTO)
-                .collect(Collectors.toList());
+    public Page<InventarioItemDTO> listarResiduos(Pageable pageable) {
+        return residuoRepository.findAll(pageable)
+                .map(this::residuoToDTO);
     }
 
-    public List<InventarioItemDTO> listarFrascos() {
-        return frascoReagenteRepository.findAll()
-                .stream()
-                .map(this::frascoToDTO)
-                .collect(Collectors.toList());
+    public Page<InventarioItemDTO> listarFrascos(Pageable pageable) {
+        return frascoReagenteRepository.findAll(pageable)
+                .map(this::frascoToDTO);
     }
 
     // -------------------------
@@ -81,7 +72,7 @@ public class InventarioService {
                 e.getNome(),
                 "EQUIPAMENTO",
                 e.getModelo() + " — " + e.getFabricante(),
-                null,  // equipamento não tem quantidade
+                null,
                 null,
                 e.getStatus().name(),
                 "Nº Série: " + e.getNumeroSerie()
