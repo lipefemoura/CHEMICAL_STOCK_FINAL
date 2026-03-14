@@ -52,6 +52,8 @@ import Perfil from "./pages/perfil/Perfil";
 import ReservaPublicPage from "./pages/Login/ReservaPublicPage";
 import AprovacaoReservaPage from "./pages/Login/AprovarReservaLab";
 
+import Inventario from "./pages/inventario/Inventario";
+
 function App() {
   return (
     <Router>
@@ -346,6 +348,15 @@ function App() {
           element={
             <PrivateRoute>
               <Perfil />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/inventario"
+          element={
+            <PrivateRoute>
+              <Inventario />
             </PrivateRoute>
           }
         />

@@ -162,6 +162,24 @@ const SideBar = ({ drawerOpen, toggleDrawer }) => {
             <ListItemText primary="Estoque" />
           </ListItem>
 
+          <ListItem
+            button
+            component={Link}
+            to="/inventario"
+            onClick={() => setSelectedItem("/inventario")}
+            selected={selectedItem === "/inventario"}
+            sx={{
+              bgcolor:
+                selectedItem === "/inventario" ? "#8BC34A" : "transparent",
+              color: "white",
+            }}
+          >
+            <ListItemIcon>
+              <InventoryIcon sx={{ color: "white" }} />
+            </ListItemIcon>
+            <ListItemText primary="Inventário" />
+          </ListItem>
+
           {/* Ordem de serviço */}
           <ListItem
             button
