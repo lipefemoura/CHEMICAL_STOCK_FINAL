@@ -103,7 +103,7 @@ public class MovimentacaoReagenteService {
         dto.setId(mov.getId());
         dto.setTipoMovimentacao(mov.getTipoMovimentacao());
         dto.setQuantidadeAlterada(mov.getQuantidadeAlterada());
-        mov.setDataMovimentacao(LocalDateTime.now());
+        dto.setDataMovimentacao(mov.getDataMovimentacao().toLocalDate());
         dto.setMotivo(mov.getMotivo());
 
         dto.setReagenteId(mov.getReagente().getId());

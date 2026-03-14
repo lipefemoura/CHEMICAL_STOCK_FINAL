@@ -2,6 +2,7 @@ package com.laboratorio.labanalise.controller;
 
 import java.util.List;
 
+import com.laboratorio.labanalise.DTO.MovimentacaoReagenteResponseDTO;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,5 +33,10 @@ public class MovimentacaoReagenteController {
             @PathVariable Long reagenteId
     ) {
         return service.listarPorReagente(reagenteId);
+    }
+
+    @GetMapping("/dto")
+    public List<MovimentacaoReagenteResponseDTO> listarDTO() {
+        return service.listarDTO();
     }
 }
