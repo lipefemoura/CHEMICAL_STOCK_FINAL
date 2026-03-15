@@ -6,12 +6,17 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import com.laboratorio.labanalise.model.Reagente;
 import com.laboratorio.labanalise.model.enums.TipoReagente;
 
+@Repository
 public interface ReagenteRepository extends JpaRepository<Reagente, Long> {
 
+    // =========================
+    // MÉTODOS ORIGINAIS
+    // =========================
     @Query("SELECT r FROM Reagente r WHERE r.dataValidade < CURRENT_DATE")
     List<Reagente> reagentesVencidos();
 
@@ -22,10 +27,12 @@ public interface ReagenteRepository extends JpaRepository<Reagente, Long> {
     List<Object[]> countReagentesByTipo();
 
     @Query("SELECT r FROM Reagente r WHERE r.dataValidade BETWEEN :hoje AND :quinzeDias")
-    List<Reagente> proximosAVencer15Dias(@Param("hoje") LocalDate hoje, @Param("quinzeDias") LocalDate quinzeDias);
+    List<Reagente> proximosAVencer15Dias(@Param("hoje") LocalDate hoje,
+                                         @Param("quinzeDias") LocalDate quinzeDias);
 
     @Query("SELECT r FROM Reagente r WHERE r.dataValidade > :quinzeDias AND r.dataValidade <= :trintaDias")
-    List<Reagente> vencemEm30Dias(@Param("quinzeDias") LocalDate quinzeDias, @Param("trintaDias") LocalDate trintaDias);
+    List<Reagente> vencemEm30Dias(@Param("quinzeDias") LocalDate quinzeDias,
+                                  @Param("trintaDias") LocalDate trintaDias);
 
     @Query("SELECT COUNT(r) FROM Reagente r WHERE r.controlado = true")
     long contarReagentesControlados();
@@ -38,15 +45,27 @@ public interface ReagenteRepository extends JpaRepository<Reagente, Long> {
             + "(:dataInicio IS NULL OR r.criadoEm >= :dataInicio) AND "
             + "(:dataFim IS NULL OR r.criadoEm <= :dataFim)")
     List<Reagente> buscarFiltrados(@Param("nome") String nome,
-            @Param("tipo") TipoReagente tipo,
-            @Param("dataInicio") LocalDate dataInicio,
-            @Param("dataFim") LocalDate dataFim);
+                                   @Param("tipo") TipoReagente tipo,
+                                   @Param("dataInicio") LocalDate dataInicio,
+                                   @Param("dataFim") LocalDate dataFim);
 
     @Query("""
-    SELECT COUNT(r)
-    FROM Reagente r
-    WHERE r.dataValidade < :hoje
-""")
+        SELECT COUNT(r)
+        FROM Reagente r
+        WHERE r.dataValidade < :hoje
+    """)
     Long contarReagentesVencidos(@Param("hoje") LocalDate hoje);
 
+    // =========================
+    // NOVOS — usados pelo resumo do inventário
+    // =========================
+    @Query("SELECT COUNT(r) FROM Reagente r WHERE r.dataValidade < :hoje")
+    long countVencidos(@Param("hoje") LocalDate hoje);
+
+    @Query("SELECT COUNT(r) FROM Reagente r WHERE r.dataValidade BETWEEN :hoje AND :limite")
+    long countProximosVencimento(@Param("hoje") LocalDate hoje,
+                                 @Param("limite") LocalDate limite);
+
+    @Query("SELECT COUNT(r) FROM Reagente r WHERE r.controlado = true")
+    long countControlados();
 }

@@ -8,20 +8,21 @@ import org.springframework.stereotype.Repository;
 
 import com.laboratorio.labanalise.DTO.projection.EquipamentoEstatisticasProjection;
 import com.laboratorio.labanalise.model.Equipamento;
-
+import com.laboratorio.labanalise.model.enums.StatusEquipamento;
 
 @Repository
 public interface EquipamentoRepository extends JpaRepository<Equipamento, Long> {
-    // Métodos customizados podem ser adi
-    // 1️⃣ Contagem de equipamentos por status
-       @Query("""
+
+    // =========================
+    // MÉTODOS ORIGINAIS
+    // =========================
+    @Query("""
         SELECT e.status AS nome, COUNT(e) AS quantidade
         FROM Equipamento e
         GROUP BY e.status
     """)
     List<EquipamentoEstatisticasProjection> contarPorStatus();
 
-    // 2️⃣ Distribuição de equipamentos por procedimento
     @Query("""
         SELECT p.nomeProcedimento AS nome, COUNT(e) AS quantidade
         FROM Procedimento p
@@ -30,7 +31,6 @@ public interface EquipamentoRepository extends JpaRepository<Equipamento, Long> 
     """)
     List<EquipamentoEstatisticasProjection> distribuicaoPorProcedimento();
 
-    // 3️⃣ Quantidade de usos (quantas amostras utilizaram cada equipamento)
     @Query("""
         SELECT e.nome AS nome, COUNT(a.id) AS quantidade
         FROM AmostraEquipamento ae
@@ -41,7 +41,6 @@ public interface EquipamentoRepository extends JpaRepository<Equipamento, Long> 
     """)
     List<EquipamentoEstatisticasProjection> contagemDeUso();
 
-    // 4️⃣ Top 5 equipamentos mais usados
     @Query("""
         SELECT e.nome AS nome, COUNT(a.id) AS quantidade
         FROM AmostraEquipamento ae
@@ -51,4 +50,9 @@ public interface EquipamentoRepository extends JpaRepository<Equipamento, Long> 
         ORDER BY COUNT(a.id) DESC
     """)
     List<EquipamentoEstatisticasProjection> top5MaisUsados();
+
+    // =========================
+    // NOVO — usado pelo resumo do inventário
+    // =========================
+    long countByStatus(StatusEquipamento status);
 }

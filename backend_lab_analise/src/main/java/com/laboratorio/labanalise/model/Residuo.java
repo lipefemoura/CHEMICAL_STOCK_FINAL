@@ -1,23 +1,21 @@
 package com.laboratorio.labanalise.model;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.time.LocalDate;
+
+import jakarta.persistence.*;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.laboratorio.labanalise.model.enums.StatusResiduo;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-
 @Entity
 @Table(name = "RESIDUO")
+@EntityListeners(AuditingEntityListener.class)
 public class Residuo implements Serializable {
 
     @Id
@@ -28,135 +26,111 @@ public class Residuo implements Serializable {
     private String nome;
 
     @Column(nullable = false)
-    private String tipo; // Ex: "ácido", "base", "sal", "óxido", "outro"
+    private String tipo;
 
     @Column(nullable = false)
-    private double quantidade; // em gramas ou litros, dependendo do tipo
+    private double quantidade;
 
     @Column(nullable = false)
-    private String unidadeMedida; // "g", "L", "mL", etc.
+    private String unidadeMedida;
 
     @Column(nullable = false)
-    private String estadoFisico; // "sólido", "líquido", "gasoso"
+    private String estadoFisico;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private StatusResiduo status;
 
     private LocalDate dataGeracao;
-
     private LocalDate dataDescarte;
 
     @Column(length = 500)
     private String observacao;
 
-    // Exemplo: relacionamento com o usuário que gerou o resíduo
     @ManyToOne
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
-    // 🔹 Construtores
-    public Residuo() {
-    }
+    // =========================
+    // AUDITORIA
+    // =========================
+    @CreatedBy
+    @Column(length = 50, updatable = false)
+    private String cadastradoPor;
 
-public Residuo(String nome, String tipo, double quantidade,
-               String unidadeMedida, String estadoFisico,
-               LocalDate dataGeracao) {
-    this.nome = nome;
-    this.tipo = tipo;
-    this.quantidade = quantidade;
-    this.unidadeMedida = unidadeMedida;
-    this.estadoFisico = estadoFisico;
-    this.dataGeracao = dataGeracao;
-    this.status = StatusResiduo.EM_ESTOQUE;
-}
+    @LastModifiedBy
+    @Column(length = 50)
+    private String atualizadoPor;
 
-    // 🔹 Getters e Setters
-    public Long getId() {
-        return id;
-    }
+    @CreatedDate
+    @Column(updatable = false)
+    private Instant criadoEm;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @LastModifiedDate
+    private Instant atualizadoEm;
 
-    public String getNome() {
-        return nome;
-    }
+    // =========================
+    // CONSTRUTORES
+    // =========================
+    public Residuo() {}
 
-    public void setNome(String nome) {
+    public Residuo(String nome, String tipo, double quantidade,
+                   String unidadeMedida, String estadoFisico,
+                   LocalDate dataGeracao) {
         this.nome = nome;
-    }
-
-    public String getTipo() {
-        return tipo;
-    }
-
-    public void setTipo(String tipo) {
         this.tipo = tipo;
-    }
-
-    public double getQuantidade() {
-        return quantidade;
-    }
-
-    public void setQuantidade(double quantidade) {
         this.quantidade = quantidade;
-    }
-
-    public String getUnidadeMedida() {
-        return unidadeMedida;
-    }
-
-    public void setUnidadeMedida(String unidadeMedida) {
         this.unidadeMedida = unidadeMedida;
-    }
-
-    public String getEstadoFisico() {
-        return estadoFisico;
-    }
-
-    public void setEstadoFisico(String estadoFisico) {
         this.estadoFisico = estadoFisico;
-    }
-
-    public LocalDate getDataGeracao() {
-        return dataGeracao;
-    }
-
-    public void setDataGeracao(LocalDate dataGeracao) {
         this.dataGeracao = dataGeracao;
+        this.status = StatusResiduo.EM_ESTOQUE;
     }
 
-    public LocalDate getDataDescarte() {
-        return dataDescarte;
-    }
+    // =========================
+    // GETTERS E SETTERS
+    // =========================
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setDataDescarte(LocalDate dataDescarte) {
-        this.dataDescarte = dataDescarte;
-    }
+    public String getNome() { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
 
-    public String getObservacao() {
-        return observacao;
-    }
+    public String getTipo() { return tipo; }
+    public void setTipo(String tipo) { this.tipo = tipo; }
 
-    public void setObservacao(String observacao) {
-        this.observacao = observacao;
-    }
+    public double getQuantidade() { return quantidade; }
+    public void setQuantidade(double quantidade) { this.quantidade = quantidade; }
 
-    public Usuario getUsuario() {
-        return usuario;
-    }
+    public String getUnidadeMedida() { return unidadeMedida; }
+    public void setUnidadeMedida(String unidadeMedida) { this.unidadeMedida = unidadeMedida; }
 
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
-    }
-public StatusResiduo getStatus() {
-    return status;
-}
+    public String getEstadoFisico() { return estadoFisico; }
+    public void setEstadoFisico(String estadoFisico) { this.estadoFisico = estadoFisico; }
 
-public void setStatus(StatusResiduo status) {
-    this.status = status;
-}
+    public StatusResiduo getStatus() { return status; }
+    public void setStatus(StatusResiduo status) { this.status = status; }
 
+    public LocalDate getDataGeracao() { return dataGeracao; }
+    public void setDataGeracao(LocalDate dataGeracao) { this.dataGeracao = dataGeracao; }
+
+    public LocalDate getDataDescarte() { return dataDescarte; }
+    public void setDataDescarte(LocalDate dataDescarte) { this.dataDescarte = dataDescarte; }
+
+    public String getObservacao() { return observacao; }
+    public void setObservacao(String observacao) { this.observacao = observacao; }
+
+    public Usuario getUsuario() { return usuario; }
+    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
+
+    public String getCadastradoPor() { return cadastradoPor; }
+    public void setCadastradoPor(String cadastradoPor) { this.cadastradoPor = cadastradoPor; }
+
+    public String getAtualizadoPor() { return atualizadoPor; }
+    public void setAtualizadoPor(String atualizadoPor) { this.atualizadoPor = atualizadoPor; }
+
+    public Instant getCriadoEm() { return criadoEm; }
+    public void setCriadoEm(Instant criadoEm) { this.criadoEm = criadoEm; }
+
+    public Instant getAtualizadoEm() { return atualizadoEm; }
+    public void setAtualizadoEm(Instant atualizadoEm) { this.atualizadoEm = atualizadoEm; }
 }
