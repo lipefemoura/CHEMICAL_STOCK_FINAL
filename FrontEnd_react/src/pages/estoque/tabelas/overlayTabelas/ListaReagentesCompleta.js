@@ -1,37 +1,41 @@
-import React, { useState, useEffect } from 'react';
-import { Paper, IconButton } from '@mui/material';
-import { FaEye, FaEdit, FaTrashAlt } from 'react-icons/fa';
-import ReagenteDetailOverlay from '../../../components/ReagenteListaIcons/ReagenteDetailOverlay';
-import ReagenteEditOverlay from '../../../components/ReagenteListaIcons/ReagenteEditOverlay';
-import ReagenteExcluirOverlay from '../../../components/ReagenteListaIcons/ReagenteExcluirOverlay';
-import OverlayFiltroReagente from '../../../components/OverlayFiltroReagente';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import { Paper, IconButton } from "@mui/material";
+import { FaEye, FaEdit, FaTrashAlt } from "react-icons/fa";
+import ReagenteDetailOverlay from "../../../components/ReagenteListaIcons/ReagenteDetailOverlay";
+import ReagenteEditOverlay from "../../../components/ReagenteListaIcons/ReagenteEditOverlay";
+import ReagenteExcluirOverlay from "../../../components/ReagenteListaIcons/ReagenteExcluirOverlay";
+import OverlayFiltroReagente from "../../../components/OverlayFiltroReagente";
+import axios from "axios";
 
 const ListaReagentesCompleta = ({ reagentes, onClose, onSave }) => {
   const [selectedReagente, setSelectedReagente] = useState(null);
   const [editOverlayOpen, setEditOverlayOpen] = useState(false);
   const [deleteOverlayOpen, setDeleteOverlayOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [filteredReagentes, setFilteredReagentes] = useState(reagentes);
   const [allReagentes, setAllReagentes] = useState([]);
   const [showFiltroOverlay, setShowFiltroOverlay] = useState(false);
 
   useEffect(() => {
-    if (searchTerm.trim() === '') {
-      axios.get('http://localhost:8080/reagente')
-        .then(res => {
+    if (searchTerm.trim() === "") {
+      axios
+        .get("http://localhost:8080/reagente")
+        .then((res) => {
           setAllReagentes(res.data);
           setFilteredReagentes(res.data);
         })
-        .catch(err => console.error(err));
+        .catch((err) => console.error(err));
     } else {
-      axios.get(`http://localhost:8080/reagente/buscarReagente?nome=${encodeURIComponent(searchTerm)}`)
-        .then(res => {
+      axios
+        .get(
+          `http://localhost:8080/reagente/buscarReagente?nome=${encodeURIComponent(searchTerm)}`,
+        )
+        .then((res) => {
           setAllReagentes(res.data);
           setFilteredReagentes(res.data);
         })
-        .catch(err => console.error(err));
+        .catch((err) => console.error(err));
     }
   }, [searchTerm]);
 
@@ -47,17 +51,20 @@ const ListaReagentesCompleta = ({ reagentes, onClose, onSave }) => {
   const handleFiltroAplicado = async (filtros) => {
     const queryParams = new URLSearchParams();
 
-    if (filtros.nome) queryParams.append('nome', filtros.nome);
-    if (filtros.tipo) queryParams.append('tipo', filtros.tipo);
-    if (filtros.dataInicio) queryParams.append('dataInicio', filtros.dataInicio);
-    if (filtros.dataFim) queryParams.append('dataFim', filtros.dataFim);
+    if (filtros.nome) queryParams.append("nome", filtros.nome);
+    if (filtros.tipo) queryParams.append("tipo", filtros.tipo);
+    if (filtros.dataInicio)
+      queryParams.append("dataInicio", filtros.dataInicio);
+    if (filtros.dataFim) queryParams.append("dataFim", filtros.dataFim);
 
     try {
-      const response = await fetch(`http://localhost:8080/reagente/filtroReagente?${queryParams.toString()}`);
+      const response = await fetch(
+        `http://localhost:8080/reagente/filtroReagente?${queryParams.toString()}`,
+      );
       const data = await response.json();
       setFilteredReagentes(data);
     } catch (error) {
-      console.error('Erro ao buscar reagentes filtrados:', error);
+      console.error("Erro ao buscar reagentes filtrados:", error);
     }
   };
 
@@ -77,14 +84,17 @@ const ListaReagentesCompleta = ({ reagentes, onClose, onSave }) => {
   };
 
   const handleConfirmDelete = async () => {
-    const response = await fetch(`http://localhost:8080/reagente/${selectedReagente.id}`, {
-      method: 'DELETE',
-    });
+    const response = await fetch(
+      `http://localhost:8080/reagente/${selectedReagente.id}`,
+      {
+        method: "DELETE",
+      },
+    );
 
     if (response.ok) {
-      console.log('Reagente excluído com sucesso');
+      console.log("Reagente excluído com sucesso");
     } else {
-      console.error('Erro ao excluir reagente');
+      console.error("Erro ao excluir reagente");
     }
 
     setDeleteOverlayOpen(false);
@@ -95,25 +105,22 @@ const ListaReagentesCompleta = ({ reagentes, onClose, onSave }) => {
     <div style={overlayStyle}>
       <div style={modalStyle}>
         <button
-          onClick={() => {
-            onClose();
-            window.location.reload();
-          }}
+          onClick={onClose}
           style={{
-            alignSelf: 'flex-end',
-            background: 'transparent',
-            border: 'none',
-            fontSize: '18px',
-            cursor: 'pointer',
-            color: '#444',
-            marginBottom: '10px'
+            alignSelf: "flex-end",
+            background: "transparent",
+            border: "none",
+            fontSize: "18px",
+            cursor: "pointer",
+            color: "#444",
+            marginBottom: "10px",
           }}
         >
           ✕
         </button>
 
         {/* Campo de busca e botões + tabela no mesmo container */}
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+        <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
           <input
             type="text"
             placeholder="Buscar por nome..."
@@ -121,20 +128,20 @@ const ListaReagentesCompleta = ({ reagentes, onClose, onSave }) => {
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{
               flex: 1,
-              padding: '10px',
-              borderRadius: '8px',
-              border: '1px solid #ccc'
+              padding: "10px",
+              borderRadius: "8px",
+              border: "1px solid #ccc",
             }}
           />
           <button
             onClick={() => console.log("Buscar clicado")}
             style={{
-              backgroundColor: '#4CAF50',
-              color: '#fff',
-              border: 'none',
-              padding: '10px 20px',
-              borderRadius: '8px',
-              cursor: 'pointer'
+              backgroundColor: "#4CAF50",
+              color: "#fff",
+              border: "none",
+              padding: "10px 20px",
+              borderRadius: "8px",
+              cursor: "pointer",
             }}
           >
             Buscar
@@ -142,12 +149,12 @@ const ListaReagentesCompleta = ({ reagentes, onClose, onSave }) => {
           <button
             onClick={() => setShowFiltroOverlay(true)}
             style={{
-              backgroundColor: '#13529bff',
-              color: '#fff',
-              border: 'none',
-              padding: '10px 20px',
-              borderRadius: '8px',
-              cursor: 'pointer'
+              backgroundColor: "#13529bff",
+              color: "#fff",
+              border: "none",
+              padding: "10px 20px",
+              borderRadius: "8px",
+              cursor: "pointer",
             }}
           >
             Filtrar
@@ -155,9 +162,12 @@ const ListaReagentesCompleta = ({ reagentes, onClose, onSave }) => {
         </div>
 
         {/* Tabela dentro do mesmo modal */}
-        <Paper elevation={4} sx={{ overflowX: 'auto', borderRadius: '12px', width: '100%' }}>
-          <table style={{ width: '100%' }}>
-            <thead style={{ backgroundColor: '#4CAF50' }}>
+        <Paper
+          elevation={4}
+          sx={{ overflowX: "auto", borderRadius: "12px", width: "100%" }}
+        >
+          <table style={{ width: "100%" }}>
+            <thead style={{ backgroundColor: "#4CAF50" }}>
               <tr>
                 <th style={thStyle}>Nome</th>
                 <th style={thStyle}>Tipo</th>
@@ -171,8 +181,12 @@ const ListaReagentesCompleta = ({ reagentes, onClose, onSave }) => {
               {filteredReagentes.map((r) => (
                 <tr
                   key={r.id}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f0f0')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#fff')}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.backgroundColor = "#f0f0f0")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.backgroundColor = "#fff")
+                  }
                 >
                   <td style={tdStyle}>{r.nome}</td>
                   <td style={tdStyle}>{r.tipo}</td>
@@ -180,15 +194,21 @@ const ListaReagentesCompleta = ({ reagentes, onClose, onSave }) => {
                   <td style={tdStyle}>{r.quantidadeDeFrascos}</td>
                   <td style={tdStyle}>{r.lote}</td>
                   <td style={tdStyle}>
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        gap: "10px",
+                      }}
+                    >
                       <IconButton onClick={() => handleView(r)}>
-                        <FaEye style={{ color: '#666' }} />
+                        <FaEye style={{ color: "#666" }} />
                       </IconButton>
                       <IconButton onClick={() => handleEdit(r)}>
-                        <FaEdit style={{ color: '#4CAF50' }} />
+                        <FaEdit style={{ color: "#4CAF50" }} />
                       </IconButton>
                       <IconButton onClick={() => handleDelete(r)}>
-                        <FaTrashAlt style={{ color: '#e74c3c' }} />
+                        <FaTrashAlt style={{ color: "#e74c3c" }} />
                       </IconButton>
                     </div>
                   </td>
@@ -236,39 +256,39 @@ const ListaReagentesCompleta = ({ reagentes, onClose, onSave }) => {
 };
 
 const overlayStyle = {
-  position: 'fixed',
+  position: "fixed",
   top: 0,
   left: 0,
-  width: '100vw',
-  height: '100vh',
-  background: 'rgba(0, 0, 0, 0.4)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  zIndex: 1000,
+  width: "100vw",
+  height: "100vh",
+  background: "rgba(0, 0, 0, 0.4)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  zIndex: 1300,
 };
 
 const modalStyle = {
-  background: '#fff',
-  padding: '30px',
-  borderRadius: '20px',
-  maxWidth: '90%',
-  maxHeight: '90%',
-  overflowY: 'auto',
-  display: 'flex',
-  flexDirection: 'column',
-  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)',
+  background: "#fff",
+  padding: "30px",
+  borderRadius: "20px",
+  maxWidth: "90%",
+  maxHeight: "90%",
+  overflowY: "auto",
+  display: "flex",
+  flexDirection: "column",
+  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.2)",
 };
 
 const thStyle = {
-  color: '#fff',
-  padding: '12px 24px',
-  textAlign: 'left',
-  fontWeight: 'bold',
+  color: "#fff",
+  padding: "12px 24px",
+  textAlign: "left",
+  fontWeight: "bold",
 };
 
 const tdStyle = {
-  padding: '12px 24px',
+  padding: "12px 24px",
 };
 
 export default ListaReagentesCompleta;

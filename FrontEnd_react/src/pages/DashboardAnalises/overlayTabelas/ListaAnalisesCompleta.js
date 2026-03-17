@@ -27,8 +27,8 @@ const ListaAnalisesCompleta = ({ analises, onClose, onSave }) => {
       axios
         .get(
           `http://localhost:8080/analise/buscarAnalise?nome=${encodeURIComponent(
-            searchTerm
-          )}`
+            searchTerm,
+          )}`,
         )
         .then((res) => setFilteredAnalises(res.data))
         .catch((err) => console.error(err));
@@ -38,7 +38,7 @@ const ListaAnalisesCompleta = ({ analises, onClose, onSave }) => {
   const handleConfirmDelete = async () => {
     const response = await fetch(
       `http://localhost:8080/analise/${selectedAnalise.id}`,
-      { method: "DELETE" }
+      { method: "DELETE" },
     );
 
     if (response.ok) {
@@ -55,10 +55,7 @@ const ListaAnalisesCompleta = ({ analises, onClose, onSave }) => {
     <div style={overlayStyle}>
       <div style={modalStyle}>
         <button
-          onClick={() => {
-            onClose();
-            window.location.reload();
-          }}
+          onClick={onClose}
           style={{
             alignSelf: "flex-end",
             background: "transparent",
@@ -142,13 +139,28 @@ const ListaAnalisesCompleta = ({ analises, onClose, onSave }) => {
                         gap: "10px",
                       }}
                     >
-                      <IconButton onClick={() => { setSelectedAnalise(a); setOpenDetail(true); }}>
+                      <IconButton
+                        onClick={() => {
+                          setSelectedAnalise(a);
+                          setOpenDetail(true);
+                        }}
+                      >
                         <FaEye style={{ color: "#666" }} />
                       </IconButton>
-                      <IconButton onClick={() => { setSelectedAnalise(a); setOpenEdit(true); }}>
+                      <IconButton
+                        onClick={() => {
+                          setSelectedAnalise(a);
+                          setOpenEdit(true);
+                        }}
+                      >
                         <FaEdit style={{ color: "#4CAF50" }} />
                       </IconButton>
-                      <IconButton onClick={() => { setSelectedAnalise(a); setOpenDelete(true); }}>
+                      <IconButton
+                        onClick={() => {
+                          setSelectedAnalise(a);
+                          setOpenDelete(true);
+                        }}
+                      >
                         <FaTrashAlt style={{ color: "#e74c3c" }} />
                       </IconButton>
                     </div>
@@ -204,7 +216,7 @@ const overlayStyle = {
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  zIndex: 1000,
+  zIndex: 1300,
 };
 
 const modalStyle = {
