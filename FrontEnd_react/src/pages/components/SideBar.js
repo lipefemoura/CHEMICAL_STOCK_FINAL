@@ -6,13 +6,10 @@ import SelectAnaliseDaAmostra from "./SelectAnaliseDaAmostra";
 import { getUsuarioLogado } from "../../services/usuarioService";
 
 import {
-  ArrowForward as ArrowForwardIcon,
-  Description as DescriptionIcon,
   ExpandLess,
   ExpandMore,
   Home as HomeIcon,
   Inventory as InventoryIcon,
-  PersonAdd as PersonAddIcon,
   Science as ScienceIcon,
   Assignment as AssignmentIcon,
   ListAlt as ListAltIcon,
@@ -23,6 +20,8 @@ import {
   Biotech as BiotechIcon,
   Category as CategoryIcon,
   FolderCopy as FolderCopyIcon,
+  Dashboard as DashboardIcon,
+  Build as BuildIcon,
 } from "@mui/icons-material";
 import LogoutIcon from "@mui/icons-material/Logout";
 
@@ -36,34 +35,25 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Tooltip,
   Typography,
 } from "@mui/material";
+import AnalitoCadastro2 from "../cadastro/AnalitoCadastro";
 import ReagenteCadastro from "../cadastro/ReagenteCadastro";
+
+const DRAWER_WIDTH = 300;
+const MINI_WIDTH = 60;
 
 const SideBar = ({ drawerOpen, toggleDrawer }) => {
   const [openMatrizOverlay, setOpenMatrizOverlay] = useState(false);
   const [openAnalitoOverlay, setOpenAnalitoOverlay] = useState(false);
   const [openAmostraOverlay, setOpenAmostraOverlay] = useState(false);
-  const [openReagenteOverlay, setOpenReagenteOverlay] = useState(false);
-
-  const handleCloseAmostraOverlay = () => setOpenAmostraOverlay(false);
-  const handleOpenAmostraOverlay = () => setOpenAmostraOverlay(true);
-  const handleOpenMatrizOverlay = () => setOpenMatrizOverlay(true);
-  const handleCloseMatrizOverlay = () => setOpenMatrizOverlay(false);
-  const handleOpenAnalitoOverlay = () => setOpenAnalitoOverlay(true);
-  const handleCloseAnalitoOverlay = () => setOpenAnalitoOverlay(false);
-  const handleCloseReagenteOverlay = () => setOpenReagenteOverlay(false);
-  const handleOpenReagenteOverlay = () => setOpenReagenteOverlay(true);
-  const [usuario, setUsuario] = useState(null);
-  const navigate = useNavigate();
-
   const [openListas, setOpenListas] = useState(false);
   const [openCadastroItens, setOpenCadastroItens] = useState(false);
   const [selectedItem, setSelectedItem] = useState("/");
+  const [usuario, setUsuario] = useState(null);
+  const navigate = useNavigate();
 
-  const handleListasClick = () => setOpenListas(!openListas);
-  const handleCadastroItensClick = () =>
-    setOpenCadastroItens(!openCadastroItens);
   useEffect(() => {
     async function carregarUsuario() {
       try {
@@ -73,35 +63,73 @@ const SideBar = ({ drawerOpen, toggleDrawer }) => {
         console.error("Erro ao carregar usuário logado:", error);
       }
     }
-
     carregarUsuario();
   }, []);
 
+  // Estilos de item do menu
+  const itemSx = (path) => ({
+    bgcolor: selectedItem === path ? "#8BC34A" : "transparent",
+    color: "white",
+    borderRadius: 1,
+    mx: 0.5,
+    "&:hover": { bgcolor: "#66BB6A" },
+  });
+
+  const subItemSx = (path) => ({
+    ...itemSx(path),
+    pl: 4,
+  });
+
+  const iconSx = { color: "white" };
+
   return (
     <>
+      {/* =====================
+          OVERLAY — fecha ao clicar fora
+      ===================== */}
+      {drawerOpen && (
+        <Box
+          onClick={toggleDrawer}
+          sx={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 1049,
+            bgcolor: "transparent",
+          }}
+        />
+      )}
+
+      {/* =====================
+          DRAWER EXPANDIDO
+      ===================== */}
       <Drawer
-        sx={{
-          width: 300,
-          flexShrink: 0,
-          "& .MuiDrawer-paper": {
-            width: 300,
-            boxSizing: "border-box",
-            backgroundColor: "#4CAF50",
-            color: "white",
-            mt: 8,
-            height: "100vh",
-          },
-        }}
         variant="persistent"
         anchor="left"
         open={drawerOpen}
+        sx={{
+          width: DRAWER_WIDTH,
+          flexShrink: 0,
+          "& .MuiDrawer-paper": {
+            width: DRAWER_WIDTH,
+            boxSizing: "border-box",
+            backgroundColor: "#4CAF50",
+            color: "white",
+            mt: "64px",
+            height: "calc(100vh - 64px)",
+            zIndex: 1050,
+            overflowX: "hidden",
+            display: "flex",
+            flexDirection: "column",
+          },
+        }}
       >
+        {/* Perfil do usuário */}
         <Box
           sx={{
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            mt: 2,
+            py: 2,
           }}
         >
           <Avatar
@@ -115,31 +143,25 @@ const SideBar = ({ drawerOpen, toggleDrawer }) => {
             {!usuario?.fotoPerfil &&
               (usuario?.nome?.charAt(0).toUpperCase() || "U")}
           </Avatar>
-
           <Typography variant="h6" sx={{ mt: 1 }}>
             {usuario?.nome || "Usuário"}
           </Typography>
-
-          <Typography variant="body2" color="rgba(255, 255, 255, 0.7)">
-            {usuario?.email || "usuario@exemplo.com"}
+          <Typography variant="body2" color="rgba(255,255,255,0.7)">
+            {usuario?.email || ""}
           </Typography>
         </Box>
 
-        <List sx={{ position: "relative", height: "100%" }}>
+        <List sx={{ flex: 1, overflowY: "auto", overflowX: "hidden", pb: 1 }}>
           {/* HOME */}
           <ListItem
             button
             component={Link}
             to="/home"
             onClick={() => setSelectedItem("/home")}
-            selected={selectedItem === "/home"}
-            sx={{
-              bgcolor: selectedItem === "/home" ? "#8BC34A" : "transparent",
-              color: "white",
-            }}
+            sx={itemSx("/home")}
           >
             <ListItemIcon>
-              <HomeIcon sx={{ color: "white" }} />
+              <HomeIcon sx={iconSx} />
             </ListItemIcon>
             <ListItemText primary="Home" />
           </ListItem>
@@ -150,234 +172,157 @@ const SideBar = ({ drawerOpen, toggleDrawer }) => {
             component={Link}
             to="/estoque"
             onClick={() => setSelectedItem("/estoque")}
-            selected={selectedItem === "/estoque"}
-            sx={{
-              bgcolor: selectedItem === "/estoque" ? "#8BC34A" : "transparent",
-              color: "white",
-            }}
+            sx={itemSx("/estoque")}
           >
             <ListItemIcon>
-              <StorageIcon sx={{ color: "white" }} />
+              <StorageIcon sx={iconSx} />
             </ListItemIcon>
             <ListItemText primary="Estoque" />
           </ListItem>
 
+          {/* INVENTÁRIO */}
           <ListItem
             button
             component={Link}
             to="/inventario"
             onClick={() => setSelectedItem("/inventario")}
-            selected={selectedItem === "/inventario"}
-            sx={{
-              bgcolor:
-                selectedItem === "/inventario" ? "#8BC34A" : "transparent",
-              color: "white",
-            }}
+            sx={itemSx("/inventario")}
           >
             <ListItemIcon>
-              <InventoryIcon sx={{ color: "white" }} />
+              <InventoryIcon sx={iconSx} />
             </ListItemIcon>
             <ListItemText primary="Inventário" />
           </ListItem>
 
-          {/* Ordem de serviço */}
+          {/* ORDEM DE SERVIÇO */}
           <ListItem
             button
             component={Link}
             to="/contratoLista"
             onClick={() => setSelectedItem("/contratoLista")}
-            selected={selectedItem === "/contratoLista"}
-            sx={{
-              bgcolor:
-                selectedItem === "/contratoLista" ? "#8BC34A" : "transparent",
-              color: "white",
-            }}
+            sx={itemSx("/contratoLista")}
           >
             <ListItemIcon>
-              <FolderCopyIcon sx={{ color: "white" }} />
+              <FolderCopyIcon sx={iconSx} />
             </ListItemIcon>
             <ListItemText primary="Ordem de Serviço" />
           </ListItem>
 
-          {/* DASHBORAD ANALISES */}
+          {/* DASHBOARD ANÁLISES */}
           <ListItem
             button
             component={Link}
             to="/dashboardAnalises"
             onClick={() => setSelectedItem("/dashboardAnalises")}
-            selected={selectedItem === "/dashboardAnalises"}
-            sx={{
-              bgcolor:
-                selectedItem === "/dashboardAnalises"
-                  ? "#8BC34A"
-                  : "transparent",
-              color: "white",
-            }}
+            sx={itemSx("/dashboardAnalises")}
           >
             <ListItemIcon>
-              <FolderCopyIcon sx={{ color: "white" }} />
+              <DashboardIcon sx={iconSx} />
             </ListItemIcon>
-            <ListItemText primary="Dashboard de Análises" />
+            <ListItemText primary="Dashboard Análises" />
           </ListItem>
 
-          {/* DASHBORAD ANALISES */}
+          {/* DASHBOARD EQUIPAMENTOS */}
           <ListItem
             button
             component={Link}
             to="/dashboardEquipamentos"
             onClick={() => setSelectedItem("/dashboardEquipamentos")}
-            selected={selectedItem === "/dashboardEquipamentos"}
-            sx={{
-              bgcolor:
-                selectedItem === "/dashboardEquipamentos"
-                  ? "#8BC34A"
-                  : "transparent",
-              color: "white",
-            }}
+            sx={itemSx("/dashboardEquipamentos")}
           >
             <ListItemIcon>
-              <FolderCopyIcon sx={{ color: "white" }} />
+              <BuildIcon sx={iconSx} />
             </ListItemIcon>
-            <ListItemText primary="Dashboard de Equipamentos" />
+            <ListItemText primary="Dashboard Equipamentos" />
           </ListItem>
 
           {/* LISTAS */}
-          <ListItem button onClick={handleListasClick}>
+          <ListItem
+            button
+            onClick={() => setOpenListas(!openListas)}
+            sx={itemSx("")}
+          >
             <ListItemIcon>
-              <ListAltIcon sx={{ color: "white" }} />
+              <ListAltIcon sx={iconSx} />
             </ListItemIcon>
             <ListItemText primary="Listas" />
-            {openListas ? <ExpandLess /> : <ExpandMore />}
+            {openListas ? (
+              <ExpandLess sx={iconSx} />
+            ) : (
+              <ExpandMore sx={iconSx} />
+            )}
           </ListItem>
-
           <Collapse in={openListas} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
-              {/* Análises */}
               <ListItem
                 button
                 component={Link}
                 to="/analiseLista"
                 onClick={() => setSelectedItem("/analiseLista")}
-                selected={selectedItem === "/analiseLista"}
-                sx={{
-                  pl: 4,
-                  bgcolor:
-                    selectedItem === "/analiseLista"
-                      ? "#8BC34A"
-                      : "transparent",
-                  color: "white",
-                }}
+                sx={subItemSx("/analiseLista")}
               >
                 <ListItemIcon>
-                  <AnalyticsIcon sx={{ color: "white" }} />
+                  <AnalyticsIcon sx={iconSx} />
                 </ListItemIcon>
                 <ListItemText primary="Análises" />
               </ListItem>
-
-              {/* Procedimentos */}
               <ListItem
                 button
                 component={Link}
                 to="/procedimentoLista"
                 onClick={() => setSelectedItem("/procedimentoLista")}
-                selected={selectedItem === "/procedimentoLista"}
-                sx={{
-                  pl: 4,
-                  bgcolor:
-                    selectedItem === "/procedimentoLista"
-                      ? "#8BC34A"
-                      : "transparent",
-                  color: "white",
-                }}
+                sx={subItemSx("/procedimentoLista")}
               >
                 <ListItemIcon>
-                  <AssignmentIcon sx={{ color: "white" }} />
+                  <AssignmentIcon sx={iconSx} />
                 </ListItemIcon>
                 <ListItemText primary="Procedimentos" />
               </ListItem>
-
-              {/* Contratos */}
               <ListItem
                 button
                 component={Link}
                 to="/contratoLista"
                 onClick={() => setSelectedItem("/contratoLista")}
-                selected={selectedItem === "/contratoLista"}
-                sx={{
-                  pl: 4,
-                  bgcolor:
-                    selectedItem === "/contratoLista"
-                      ? "#8BC34A"
-                      : "transparent",
-                  color: "white",
-                }}
+                sx={subItemSx("/contratoLista")}
               >
                 <ListItemIcon>
-                  <FolderCopyIcon sx={{ color: "white" }} />
+                  <FolderCopyIcon sx={iconSx} />
                 </ListItemIcon>
                 <ListItemText primary="Contratos" />
               </ListItem>
-
-              {/* Matrizes */}
               <ListItem
                 button
                 component={Link}
                 to="/matrizLista"
                 onClick={() => setSelectedItem("/matrizLista")}
-                selected={selectedItem === "/matrizLista"}
-                sx={{
-                  pl: 4,
-                  bgcolor:
-                    selectedItem === "/matrizLista" ? "#8BC34A" : "transparent",
-                  color: "white",
-                }}
+                sx={subItemSx("/matrizLista")}
               >
                 <ListItemIcon>
-                  <CategoryIcon sx={{ color: "white" }} />
+                  <CategoryIcon sx={iconSx} />
                 </ListItemIcon>
                 <ListItemText primary="Matrizes" />
               </ListItem>
-
-              {/* Clientes */}
               <ListItem
                 button
                 component={Link}
                 to="/clientesLista"
                 onClick={() => setSelectedItem("/clientesLista")}
-                selected={selectedItem === "/clientesLista"}
-                sx={{
-                  pl: 4,
-                  bgcolor:
-                    selectedItem === "/clientesLista"
-                      ? "#8BC34A"
-                      : "transparent",
-                  color: "white",
-                }}
+                sx={subItemSx("/clientesLista")}
               >
                 <ListItemIcon>
-                  <PeopleIcon sx={{ color: "white" }} />
+                  <PeopleIcon sx={iconSx} />
                 </ListItemIcon>
                 <ListItemText primary="Clientes" />
               </ListItem>
-
-              {/* Amostras */}
               <ListItem
                 button
                 component={Link}
                 to="/amostraLista"
                 onClick={() => setSelectedItem("/amostraLista")}
-                selected={selectedItem === "/amostraLista"}
-                sx={{
-                  pl: 4,
-                  bgcolor:
-                    selectedItem === "/amostraLista"
-                      ? "#8BC34A"
-                      : "transparent",
-                  color: "white",
-                }}
+                sx={subItemSx("/amostraLista")}
               >
                 <ListItemIcon>
-                  <BiotechIcon sx={{ color: "white" }} />
+                  <BiotechIcon sx={iconSx} />
                 </ListItemIcon>
                 <ListItemText primary="Amostras" />
               </ListItem>
@@ -385,217 +330,134 @@ const SideBar = ({ drawerOpen, toggleDrawer }) => {
           </Collapse>
 
           {/* CADASTRO DE ITENS */}
-          <ListItem button onClick={handleCadastroItensClick}>
+          <ListItem
+            button
+            onClick={() => setOpenCadastroItens(!openCadastroItens)}
+            sx={itemSx("")}
+          >
             <ListItemIcon>
-              <InventoryIcon sx={{ color: "white" }} />
+              <InventoryIcon sx={iconSx} />
             </ListItemIcon>
             <ListItemText primary="Cadastro de Itens" />
-            {openCadastroItens ? <ExpandLess /> : <ExpandMore />}
+            {openCadastroItens ? (
+              <ExpandLess sx={iconSx} />
+            ) : (
+              <ExpandMore sx={iconSx} />
+            )}
           </ListItem>
-
           <Collapse in={openCadastroItens} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
-              {/* Análises */}
               <ListItem
                 button
                 component={Link}
                 to="/analiseCadastro"
                 onClick={() => setSelectedItem("/analiseCadastro")}
-                selected={selectedItem === "/analiseCadastro"}
-                sx={{
-                  pl: 4,
-                  bgcolor:
-                    selectedItem === "/analiseCadastro"
-                      ? "#8BC34A"
-                      : "transparent",
-                  color: "white",
-                }}
+                sx={subItemSx("/analiseCadastro")}
               >
                 <ListItemIcon>
-                  <AnalyticsIcon sx={{ color: "white" }} />
+                  <AnalyticsIcon sx={iconSx} />
                 </ListItemIcon>
                 <ListItemText primary="Análises" />
               </ListItem>
-
-              {/* Amostras */}
               <ListItem
                 button
-                onClick={handleOpenAmostraOverlay}
-                selected={selectedItem === "/amostraCadastro"}
-                sx={{
-                  pl: 4,
-                  bgcolor:
-                    selectedItem === "/amostraCadastro"
-                      ? "#8BC34A"
-                      : "transparent",
-                  color: "white",
-                }}
+                onClick={() => setOpenAmostraOverlay(true)}
+                sx={subItemSx("/amostraCadastro")}
               >
                 <ListItemIcon>
-                  <BiotechIcon sx={{ color: "white" }} />
+                  <BiotechIcon sx={iconSx} />
                 </ListItemIcon>
                 <ListItemText primary="Amostras" />
               </ListItem>
-
               <SelectAnaliseDaAmostra
                 open={openAmostraOverlay}
-                handleClose={handleCloseAmostraOverlay}
+                handleClose={() => setOpenAmostraOverlay(false)}
               />
-
-              {/* Matriz */}
               <ListItem
                 button
-                onClick={handleOpenMatrizOverlay}
-                sx={{
-                  pl: 4,
-                  bgcolor:
-                    selectedItem === "/matrizCadastro"
-                      ? "#8BC34A"
-                      : "transparent",
-                  color: "white",
-                }}
+                onClick={() => setOpenMatrizOverlay(true)}
+                sx={subItemSx("/matrizCadastro")}
               >
                 <ListItemIcon>
-                  <CategoryIcon sx={{ color: "white" }} />
+                  <CategoryIcon sx={iconSx} />
                 </ListItemIcon>
                 <ListItemText primary="Matriz" />
               </ListItem>
-
               <MatrizCadastro
                 open={openMatrizOverlay}
-                handleClose={handleCloseMatrizOverlay}
+                handleClose={() => setOpenMatrizOverlay(false)}
               />
-
-              {/* Equipamentos */}
               <ListItem
                 button
                 component={Link}
                 to="/equipamentoCadastro"
                 onClick={() => setSelectedItem("/equipamentoCadastro")}
-                selected={selectedItem === "/equipamentoCadastro"}
-                sx={{
-                  pl: 4,
-                  bgcolor:
-                    selectedItem === "/equipamentoCadastro"
-                      ? "#8BC34A"
-                      : "transparent",
-                  color: "white",
-                }}
+                sx={subItemSx("/equipamentoCadastro")}
               >
                 <ListItemIcon>
-                  <AnalyticsIcon sx={{ color: "white" }} />
+                  <BuildIcon sx={iconSx} />
                 </ListItemIcon>
                 <ListItemText primary="Equipamentos" />
               </ListItem>
-
-              {/* Resíduos */}
               <ListItem
                 button
                 component={Link}
                 to="/residuoCadastro"
                 onClick={() => setSelectedItem("/residuoCadastro")}
-                selected={selectedItem === "/residuoCadastro"}
-                sx={{
-                  pl: 4,
-                  bgcolor:
-                    selectedItem === "/residuoCadastro"
-                      ? "#8BC34A"
-                      : "transparent",
-                  color: "white",
-                }}
+                sx={subItemSx("/residuoCadastro")}
               >
                 <ListItemIcon>
-                  <AnalyticsIcon sx={{ color: "white" }} />
+                  <AnalyticsIcon sx={iconSx} />
                 </ListItemIcon>
                 <ListItemText primary="Resíduos" />
               </ListItem>
-
-              {/* Reagentes */}
               <ListItem
                 button
                 component={Link}
                 to="/reagenteCadastro"
                 onClick={() => setSelectedItem("/reagenteCadastro")}
-                selected={selectedItem === "/reagenteCadastro"}
-                sx={{
-                  pl: 4,
-                  bgcolor:
-                    selectedItem === "/reagenteCadastro"
-                      ? "#8BC34A"
-                      : "transparent",
-                  color: "white",
-                }}
+                sx={subItemSx("/reagenteCadastro")}
               >
                 <ListItemIcon>
-                  <ScienceIcon sx={{ color: "white" }} />
+                  <ScienceIcon sx={iconSx} />
                 </ListItemIcon>
                 <ListItemText primary="Reagentes" />
               </ListItem>
-
-              {/* Analito */}
               <ListItem
                 button
-                onClick={handleOpenAnalitoOverlay}
-                sx={{
-                  pl: 4,
-                  bgcolor:
-                    selectedItem === "/analitoCadastro"
-                      ? "#8BC34A"
-                      : "transparent",
-                  color: "white",
-                }}
+                onClick={() => setOpenAnalitoOverlay(true)}
+                sx={subItemSx("/analitoCadastro")}
               >
                 <ListItemIcon>
-                  <ScienceIcon sx={{ color: "white" }} />
+                  <ScienceIcon sx={iconSx} />
                 </ListItemIcon>
                 <ListItemText primary="Analito" />
               </ListItem>
-
               <AnalitoCadastro
                 open={openAnalitoOverlay}
-                handleClose={handleCloseAnalitoOverlay}
+                handleClose={() => setOpenAnalitoOverlay(false)}
               />
-
-              {/* Clientes */}
               <ListItem
                 button
                 component={Link}
                 to="/clienteCadastro"
                 onClick={() => setSelectedItem("/clienteCadastro")}
-                selected={selectedItem === "/clienteCadastro"}
-                sx={{
-                  pl: 4,
-                  bgcolor:
-                    selectedItem === "/clienteCadastro"
-                      ? "#8BC34A"
-                      : "transparent",
-                  color: "white",
-                }}
+                sx={subItemSx("/clienteCadastro")}
               >
                 <ListItemIcon>
-                  <PeopleIcon sx={{ color: "white" }} />
+                  <PeopleIcon sx={iconSx} />
                 </ListItemIcon>
                 <ListItemText primary="Clientes" />
               </ListItem>
-
-              {/* Procedimentos */}
               <ListItem
                 button
                 component={Link}
                 to="/procedimentoCadastro"
                 onClick={() => setSelectedItem("/procedimentoCadastro")}
-                selected={selectedItem === "/procedimentoCadastro"}
-                sx={{
-                  pl: 4,
-                  bgcolor:
-                    selectedItem === "/procedimentoCadastro"
-                      ? "#8BC34A"
-                      : "transparent",
-                  color: "white",
-                }}
+                sx={subItemSx("/procedimentoCadastro")}
               >
                 <ListItemIcon>
-                  <AssignmentIcon sx={{ color: "white" }} />
+                  <AssignmentIcon sx={iconSx} />
                 </ListItemIcon>
                 <ListItemText primary="Procedimentos" />
               </ListItem>
@@ -608,73 +470,120 @@ const SideBar = ({ drawerOpen, toggleDrawer }) => {
             component={Link}
             to="/perfil"
             onClick={() => setSelectedItem("/perfil")}
-            selected={selectedItem === "/perfil"}
-            sx={{
-              bgcolor: selectedItem === "/perfil" ? "#8BC34A" : "transparent",
-              color: "white",
-            }}
+            sx={itemSx("/perfil")}
           >
             <ListItemIcon>
-              <AccountCircleIcon sx={{ color: "white" }} />
+              <AccountCircleIcon sx={iconSx} />
             </ListItemIcon>
             <ListItemText primary="Perfil" />
           </ListItem>
+        </List>
 
-          {/* LOGOUT — ÍCONE NO CANTO INFERIOR */}
+        {/* LOGOUT fixo no rodapé */}
+        <Box sx={{ flexShrink: 0, width: "100%", bgcolor: "#388E3C", py: 0.5 }}>
           <ListItem
             button
             onClick={() => {
               localStorage.removeItem("token");
               navigate("/loginPage");
             }}
-            sx={{
-              position: "absolute",
-              bottom: 10,
-              left: 10,
-              width: "auto",
-              color: "white",
-              padding: 0,
-              minWidth: 0,
-            }}
+            sx={{ color: "white", "&:hover": { bgcolor: "#2E7D32" } }}
           >
-            <LogoutIcon sx={{ color: "white", fontSize: 28 }} />
+            <ListItemIcon>
+              <LogoutIcon sx={iconSx} />
+            </ListItemIcon>
+            <ListItemText primary="Sair" />
           </ListItem>
-        </List>
+        </Box>
       </Drawer>
 
-      {/* Ícones compactos (sidebar recolhida) */}
+      {/* =====================
+          MINI SIDEBAR — recolhida
+      ===================== */}
       {!drawerOpen && (
         <Box
           sx={{
             position: "fixed",
             left: 0,
-            top: 0,
-            height: "100vh",
-            width: 60,
+            top: "64px",
+            height: "calc(100vh - 64px)",
+            width: MINI_WIDTH,
             backgroundColor: "#4CAF50",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            borderRadius: 1,
             boxShadow: 2,
-            paddingTop: "70px",
+            zIndex: 1050,
+            pt: 1,
+            pb: 1,
           }}
         >
-          <IconButton onClick={toggleDrawer} sx={{ color: "white" }}>
-            <ArrowForwardIcon />
-          </IconButton>
-          <IconButton sx={{ color: "white" }}>
-            <HomeIcon />
-          </IconButton>
-          <IconButton sx={{ color: "white" }}>
-            <ListAltIcon />
-          </IconButton>
-          <IconButton sx={{ color: "white" }}>
-            <InventoryIcon />
-          </IconButton>
-          <IconButton sx={{ color: "white" }}>
-            <AccountCircleIcon />
-          </IconButton>
+          <Tooltip title="Home" placement="right">
+            <IconButton sx={iconSx} onClick={() => navigate("/home")}>
+              <HomeIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Estoque" placement="right">
+            <IconButton sx={iconSx} onClick={() => navigate("/estoque")}>
+              <StorageIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Inventário" placement="right">
+            <IconButton sx={iconSx} onClick={() => navigate("/inventario")}>
+              <InventoryIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Ordem de Serviço" placement="right">
+            <IconButton sx={iconSx} onClick={() => navigate("/contratoLista")}>
+              <FolderCopyIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Dashboard Análises" placement="right">
+            <IconButton
+              sx={iconSx}
+              onClick={() => navigate("/dashboardAnalises")}
+            >
+              <DashboardIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Dashboard Equipamentos" placement="right">
+            <IconButton
+              sx={iconSx}
+              onClick={() => navigate("/dashboardEquipamentos")}
+            >
+              <BuildIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Listas" placement="right">
+            <IconButton sx={iconSx} onClick={toggleDrawer}>
+              <ListAltIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Cadastro de Itens" placement="right">
+            <IconButton sx={iconSx} onClick={toggleDrawer}>
+              <InventoryIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Perfil" placement="right">
+            <IconButton sx={iconSx} onClick={() => navigate("/perfil")}>
+              <AccountCircleIcon />
+            </IconButton>
+          </Tooltip>
+
+          {/* Logout no rodapé */}
+          <Box sx={{ position: "absolute", bottom: 8 }}>
+            <Tooltip title="Sair" placement="right">
+              <IconButton
+                sx={iconSx}
+                onClick={() => {
+                  localStorage.removeItem("token");
+                  navigate("/loginPage");
+                }}
+              >
+                <LogoutIcon />
+              </IconButton>
+            </Tooltip>
+          </Box>
         </Box>
       )}
     </>
