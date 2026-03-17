@@ -2,65 +2,60 @@
 import React, { useState, useEffect } from "react";
 import { Paper, IconButton } from "@mui/material";
 import { FaEye, FaEdit, FaTrashAlt } from "react-icons/fa";
-import axios from "axios";
+import { apiGet, apiDelete } from "../../../services/api";
 import OverlayFiltroEquipamento from "./OverlayFiltroEquipamento";
 import EquipamentoExcluirOverlay from "../../components/equiapamentosListaIcons/EquipamentoExcluirOverlay";
 import EquipamentoEditOverlay from "../../components/equiapamentosListaIcons/EquipamentoditOverlay";
 import EquipamentoDetailOverlay from "../../components/equiapamentosListaIcons/EquipamentoDetailOverlay";
-const ListaEquipamentosCompleta = ({ equipamentos, onClose, onSave }) => {
+
+const ListaEquipamentosCompleta = ({ onClose, onSave }) => {
   const [selectedEquipamento, setSelectedEquipamento] = useState(null);
   const [openDetail, setOpenDetail] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
-
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredEquipamentos, setFilteredEquipamentos] = useState(equipamentos);
-
+  const [filteredEquipamentos, setFilteredEquipamentos] = useState([]);
   const [showFiltroOverlay, setShowFiltroOverlay] = useState(false);
 
   useEffect(() => {
-    if (searchTerm.trim() === "") {
-      axios
-        .get("http://localhost:8080/equipamento")
-        .then((res) => setFilteredEquipamentos(res.data))
-        .catch((err) => console.error(err));
-    } else {
-      axios
-        .get(
-          `http://localhost:8080/equipamento/buscarEquipamento?nome=${encodeURIComponent(
-            searchTerm
-          )}`
-        )
-        .then((res) => setFilteredEquipamentos(res.data))
-        .catch((err) => console.error(err));
-    }
+    carregarEquipamentos();
   }, [searchTerm]);
 
-  const handleConfirmDelete = async () => {
-    const response = await fetch(
-      `http://localhost:8080/equipamento/${selectedEquipamento.id}`,
-      { method: "DELETE" }
-    );
-
-    if (response.ok) {
-      console.log("Equipamento excluído com sucesso");
-    } else {
-      console.error("Erro ao excluir equipamento");
+  const carregarEquipamentos = async () => {
+    try {
+      // ✅ URL corrigida: /equipamentos (com s)
+      const endpoint =
+        searchTerm.trim() === ""
+          ? "/equipamentos"
+          : `/equipamentos/buscarEquipamento?nome=${encodeURIComponent(searchTerm)}`;
+      const data = await apiGet(endpoint);
+      setFilteredEquipamentos(data ?? []);
+    } catch (err) {
+      console.error("Erro ao carregar equipamentos:", err);
     }
+  };
 
-    setOpenDelete(false);
-    setSelectedEquipamento(null);
+  const handleConfirmDelete = async () => {
+    try {
+      // ✅ DELETE com token via apiDelete
+      await apiDelete(`/equipamentos/${selectedEquipamento.id}`);
+      setFilteredEquipamentos((prev) =>
+        prev.filter((e) => e.id !== selectedEquipamento.id),
+      );
+    } catch (err) {
+      console.error("Erro ao excluir equipamento:", err);
+    } finally {
+      setOpenDelete(false);
+      setSelectedEquipamento(null);
+    }
   };
 
   return (
     <div style={overlayStyle}>
       <div style={modalStyle}>
-        {/* Botão para fechar */}
+        {/* Botão fechar */}
         <button
-          onClick={() => {
-            onClose();
-            window.location.reload();
-          }}
+          onClick={onClose}
           style={{
             alignSelf: "flex-end",
             background: "transparent",
@@ -74,7 +69,7 @@ const ListaEquipamentosCompleta = ({ equipamentos, onClose, onSave }) => {
           ✕
         </button>
 
-        {/* Barra de busca + botões */}
+        {/* Barra de busca */}
         <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
           <input
             type="text"
@@ -88,7 +83,7 @@ const ListaEquipamentosCompleta = ({ equipamentos, onClose, onSave }) => {
               border: "1px solid #ccc",
             }}
           />
-          <button onClick={() => {}} style={buttonStyle("#4CAF50")}>
+          <button onClick={carregarEquipamentos} style={buttonStyle("#4CAF50")}>
             Buscar
           </button>
           <button
@@ -102,81 +97,88 @@ const ListaEquipamentosCompleta = ({ equipamentos, onClose, onSave }) => {
         {/* Tabela */}
         <Paper
           elevation={4}
-          sx={{
-            overflowX: "auto",
-            borderRadius: "12px",
-            width: "100%",
-          }}
+          sx={{ overflowX: "auto", borderRadius: "12px", width: "100%" }}
         >
           <table style={{ width: "100%" }}>
             <thead style={{ backgroundColor: "#4CAF50" }}>
               <tr>
                 <th style={thStyle}>Nome</th>
-                <th style={thStyle}>Categoria</th>
+                <th style={thStyle}>Modelo</th>
                 <th style={thStyle}>Fabricante</th>
-                <th style={thStyle}>Data Cadastro</th>
+                <th style={thStyle}>Nº Série</th>
+                <th style={thStyle}>Status</th>
                 <th style={thStyle}>Ações</th>
               </tr>
             </thead>
             <tbody>
-              {filteredEquipamentos.map((eq) => (
-                <tr
-                  key={eq.id}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.backgroundColor = "#f0f0f0")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.backgroundColor = "#fff")
-                  }
-                >
-                  <td style={tdStyle}>{eq.nomeEquipamento}</td>
-                  <td style={tdStyle}>{eq.categoriaNome}</td>
-                  <td style={tdStyle}>{eq.fabricante}</td>
-                  <td style={tdStyle}>{eq.dataCadastro}</td>
-                  <td style={tdStyle}>
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        gap: "10px",
-                      }}
-                    >
-                      <IconButton
-                        onClick={() => {
-                          setSelectedEquipamento(eq);
-                          setOpenDetail(true);
-                        }}
-                      >
-                        <FaEye style={{ color: "#666" }} />
-                      </IconButton>
-
-                      <IconButton
-                        onClick={() => {
-                          setSelectedEquipamento(eq);
-                          setOpenEdit(true);
-                        }}
-                      >
-                        <FaEdit style={{ color: "#4CAF50" }} />
-                      </IconButton>
-
-                      <IconButton
-                        onClick={() => {
-                          setSelectedEquipamento(eq);
-                          setOpenDelete(true);
-                        }}
-                      >
-                        <FaTrashAlt style={{ color: "#e74c3c" }} />
-                      </IconButton>
-                    </div>
+              {filteredEquipamentos.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={6}
+                    style={{ ...tdStyle, textAlign: "center", color: "#999" }}
+                  >
+                    Nenhum equipamento encontrado.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filteredEquipamentos.map((eq) => (
+                  <tr
+                    key={eq.id}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.backgroundColor = "#f0f0f0")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.backgroundColor = "#fff")
+                    }
+                  >
+                    {/* ✅ Campos corrigidos: eq.nome, eq.modelo etc. */}
+                    <td style={tdStyle}>{eq.nome}</td>
+                    <td style={tdStyle}>{eq.modelo}</td>
+                    <td style={tdStyle}>{eq.fabricante}</td>
+                    <td style={tdStyle}>{eq.numeroSerie}</td>
+                    <td style={tdStyle}>{eq.status}</td>
+                    <td style={tdStyle}>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          gap: "10px",
+                        }}
+                      >
+                        <IconButton
+                          onClick={() => {
+                            setSelectedEquipamento(eq);
+                            setOpenDetail(true);
+                          }}
+                        >
+                          <FaEye style={{ color: "#666" }} />
+                        </IconButton>
+                        <IconButton
+                          onClick={() => {
+                            setSelectedEquipamento(eq);
+                            setOpenEdit(true);
+                          }}
+                        >
+                          <FaEdit style={{ color: "#4CAF50" }} />
+                        </IconButton>
+                        <IconButton
+                          onClick={() => {
+                            setSelectedEquipamento(eq);
+                            setOpenDelete(true);
+                          }}
+                        >
+                          <FaTrashAlt style={{ color: "#e74c3c" }} />
+                        </IconButton>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </Paper>
       </div>
 
-      {/* Overlays */}
       {selectedEquipamento && openDetail && (
         <EquipamentoDetailOverlay
           open={openDetail}
@@ -184,16 +186,17 @@ const ListaEquipamentosCompleta = ({ equipamentos, onClose, onSave }) => {
           equipamento={selectedEquipamento}
         />
       )}
-
       {selectedEquipamento && openEdit && (
         <EquipamentoEditOverlay
           open={openEdit}
           onClose={() => setOpenEdit(false)}
           equipamento={selectedEquipamento}
-          onSave={onSave}
+          onSave={() => {
+            onSave?.();
+            carregarEquipamentos();
+          }}
         />
       )}
-
       {selectedEquipamento && openDelete && (
         <EquipamentoExcluirOverlay
           open={openDelete}
@@ -202,7 +205,6 @@ const ListaEquipamentosCompleta = ({ equipamentos, onClose, onSave }) => {
           equipamento={selectedEquipamento}
         />
       )}
-
       {showFiltroOverlay && (
         <OverlayFiltroEquipamento
           open={showFiltroOverlay}
@@ -231,6 +233,7 @@ const modalStyle = {
   padding: "30px",
   borderRadius: "20px",
   maxWidth: "90%",
+  width: "800px",
   maxHeight: "90%",
   overflowY: "auto",
   display: "flex",
@@ -245,9 +248,7 @@ const thStyle = {
   fontWeight: "bold",
 };
 
-const tdStyle = {
-  padding: "12px 24px",
-};
+const tdStyle = { padding: "12px 24px" };
 
 const buttonStyle = (color) => ({
   backgroundColor: color,
