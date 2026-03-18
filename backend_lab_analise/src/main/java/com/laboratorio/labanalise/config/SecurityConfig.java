@@ -36,6 +36,7 @@ public class SecurityConfig {
                 .requestMatchers("/usuarios/pendentes/**").permitAll()
 .requestMatchers("/reserva-laboratorio", "/reserva-laboratorio/**").permitAll()
                 .requestMatchers("/equipamentos", "/equipamentos/**").permitAll()
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 //.requestMatchers("/reagente/**").authenticated() // precisa de login
                 .anyRequest().authenticated()
             )
